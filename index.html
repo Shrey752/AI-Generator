@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Last Call — A Noir Murder Mystery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─────────────────────────────────── */
+:root{
+  --ink:#070708; --ink2:#0e0e12; --ink3:#16161c;
+  --paper:#e7dcc6; --paper2:#d3c6ab; --paper-edge:#b8a883;
+  --blood:#7c1818; --blood-bright:#c4302b; --blood-glow:rgba(196,48,43,.5);
+  --brass:#c9a45c; --brass-bright:#e3c787; --brass-dim:#8a6e3c;
+  --smoke:#6f6f78; --fog:#a6a6b0; --green:#5b9168;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --font-d:'Oswald',sans-serif;
+  --font-b:'Bebas Neue',sans-serif;
+  --font-r:'Cormorant Garamond',serif;
+  --font-t:'Special Elite',cursive;
+}
+
+/* ─── RESET ──────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:18px;scroll-behavior:smooth}
+body{
+  background:var(--ink);
+  color:var(--fog);
+  font-family:var(--font-r);
+  font-size:1rem;
+  line-height:1.65;
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:none;
+  position:relative;
+}
+@media(hover:none){body{cursor:auto}}
+
+/* ─── ATMOSPHERE ─────────────────────────────── */
+/* grain */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
+  opacity:.06;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;
+  animation:grain .12s steps(1) infinite;
+}
+@keyframes grain{
+  0%{background-position:0 0}20%{background-position:-30px 10px}
+  40%{background-position:20px -20px}60%{background-position:-10px 30px}
+  80%{background-position:35px -5px}100%{background-position:0 0}
+}
+/* vignette */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:8999;
+  background:radial-gradient(ellipse at 50% 40%,transparent 40%,rgba(0,0,0,.82) 100%);
+}
+/* glow layer */
+#atm-glow{
+  position:fixed;inset:0;pointer-events:none;z-index:8990;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% -10%,rgba(201,164,92,.07),transparent),
+    radial-gradient(ellipse 40% 60% at 100% 80%,rgba(124,24,24,.09),transparent),
+    radial-gradient(ellipse 50% 60% at 0% 50%,rgba(40,60,90,.08),transparent);
+}
+/* rain */
+#atm-rain{
+  position:fixed;inset:0;pointer-events:none;z-index:8991;
+  mix-blend-mode:screen;opacity:.13;
+  background-image:repeating-linear-gradient(
+    105deg,
+    transparent 0,transparent 2px,
+    rgba(150,170,200,.6) 2px,rgba(150,170,200,.6) 3px,
+    transparent 3px,transparent 40px
+  );
+  animation:rain-move .55s linear infinite;
+}
+@keyframes rain-move{to{background-position:0 80px}}
+/* smoke */
+#atm-smoke{
+  position:fixed;inset:0;pointer-events:none;z-index:8992;mix-blend-mode:screen;
+}
+#atm-smoke span{
+  position:absolute;border-radius:50%;filter:blur(60px);
+  animation:smoke-drift 26s ease-in-out infinite alternate;
+}
+#atm-smoke span:nth-child(1){width:500px;height:300px;background:rgba(100,90,70,.07);left:10%;top:20%;animation-delay:0s}
+#atm-smoke span:nth-child(2){width:400px;height:400px;background:rgba(80,60,50,.06);right:5%;bottom:10%;animation-delay:-10s}
+#atm-smoke span:nth-child(3){width:600px;height:200px;background:rgba(60,70,80,.05);left:30%;top:60%;animation-delay:-5s}
+@keyframes smoke-drift{
+  from{transform:translate(0,0) scale(1)}
+  to{transform:translate(30px,-20px) scale(1.08)}
+}
+
+/* ─── CUSTOM CURSOR ──────────────────────────── */
+#cursor-dot{
+  position:fixed;width:6px;height:6px;border-radius:50%;
+  background:var(--brass);pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);transition:none;
+}
+#cursor-ring{
+  position:fixed;width:30px;height:30px;border-radius:50%;
+  border:1.5px solid var(--brass);pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);mix-blend-mode:difference;
+  transition:width .2s var(--ease),height .2s var(--ease),border-color .2s;
+}
+#cursor-ring.hot{width:54px;height:54px;border-color:var(--blood-bright)}
+@media(hover:none){#cursor-dot,#cursor-ring{display:none}}
+
+/* ─── BOOT OVERLAY ───────────────────────────── */
+#boot{
+  position:fixed;inset:0;background:var(--ink);z-index:9990;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.6rem;padding:2rem;
+  transition:opacity .7s var(--ease),visibility .7s;
+}
+#boot.gone{opacity:0;visibility:hidden;pointer-events:none}
+#boot-bureau{
+  font-family:var(--font-b);font-size:clamp(1rem,3vw,1.5rem);
+  letter-spacing:.7em;color:var(--brass);text-transform:uppercase;
+  opacity:0;animation:fade-in .6s .2s var(--ease) forwards;
+}
+#boot-bar-wrap{width:min(320px,80vw);height:1px;background:rgba(255,255,255,.1);position:relative}
+#boot-bar-fill{
+  position:absolute;top:0;left:0;height:100%;width:0%;
+  background:linear-gradient(90deg,var(--blood),var(--brass));
+  transition:width 2.1s var(--ease);
+}
+#boot-status{
+  font-family:var(--font-t);font-size:.78rem;letter-spacing:.18em;
+  color:var(--smoke);text-transform:uppercase;min-height:1.2em;
+}
+
+/* ─── SCENES ─────────────────────────────────── */
+.scene{display:none;min-height:100vh;animation:scene-in .4s var(--ease-out)}
+.scene.active{display:flex;flex-direction:column;align-items:center}
+@keyframes scene-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ─── TOP PROGRESS BAR ───────────────────────── */
+#prog-bar{position:fixed;top:0;left:0;right:0;height:2px;z-index:9000;background:rgba(255,255,255,.04)}
+#prog-fill{height:100%;background:linear-gradient(90deg,var(--blood-bright),var(--brass));transition:width .5s var(--ease);width:0%}
+
+/* ─── TYPE HELPERS ───────────────────────────── */
+h1,h2,h3{font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase}
+h1{font-size:clamp(2.5rem,7vw,5rem);line-height:.95}
+h2{font-size:clamp(1.4rem,3.5vw,2.2rem)}
+h3{font-size:1rem}
+.kicker{
+  font-family:var(--font-t);font-size:.7rem;letter-spacing:.3em;
+  color:var(--blood-bright);text-transform:uppercase;
+  display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem;
+}
+.kicker::before{content:'';display:block;width:24px;height:1px;background:var(--blood)}
+.section-label{
+  font-family:var(--font-t);font-size:.68rem;letter-spacing:.28em;
+  color:var(--smoke);text-transform:uppercase;
+  display:flex;align-items:center;gap:.8rem;margin:2.2rem 0 1rem;
+}
+.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(111,111,120,.4),transparent)}
+.rule-orn{
+  display:flex;align-items:center;gap:.8rem;margin:1.5rem 0;
+  color:var(--smoke);font-size:.75rem;
+}
+.rule-orn::before,.rule-orn::after{content:'';flex:1;height:1px;background:rgba(111,111,120,.3)}
+.accent{color:var(--brass)}
+p{margin-bottom:.85em}
+
+/* ─── BUTTONS ────────────────────────────────── */
+.btn{
+  font-family:var(--font-d);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
+  border:1.5px solid currentColor;background:transparent;cursor:none;
+  padding:.65em 1.7em;position:relative;overflow:hidden;
+  transition:color .25s var(--ease),letter-spacing .25s var(--ease);
+  display:inline-block;
+}
+.btn::after{
+  content:'';position:absolute;inset:0;transform:translateY(101%);
+  transition:transform .28s var(--ease);
+}
+.btn:hover::after{transform:translateY(0)}
+.btn span{position:relative;z-index:1}
+.btn-blood{color:var(--blood-bright)}
+.btn-blood::after{background:var(--blood)}
+.btn-blood:hover{color:var(--paper)}
+.btn-brass{color:var(--brass)}
+.btn-brass::after{background:var(--brass)}
+.btn-brass:hover{color:var(--ink)}
+.btn-ghost{color:var(--smoke)}
+.btn-ghost::after{background:rgba(255,255,255,.06)}
+.btn-ghost:hover{color:var(--fog)}
+.btn:disabled{opacity:.3;pointer-events:none}
+
+/* ─── DOSSIER ────────────────────────────────── */
+.dossier{
+  background:linear-gradient(160deg,var(--paper) 0%,var(--paper2) 100%);
+  color:#1e1608;
+  padding:2.4rem 2.6rem 2.2rem;
+  position:relative;
+  box-shadow:0 2px 0 var(--paper-edge),0 12px 60px rgba(0,0,0,.75),inset 0 0 80px rgba(0,0,0,.07);
+  transform:perspective(900px) rotateX(.4deg);
+  margin-bottom:1.6rem;
+  overflow:hidden;
+}
+.dossier::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,.045) 27px,rgba(0,0,0,.045) 28px);
+}
+/* folded corner */
+.dossier::after{
+  content:'';position:absolute;top:0;right:0;
+  width:0;height:0;
+  border-style:solid;
+  border-width:0 28px 28px 0;
+  border-color:transparent var(--paper-edge) transparent transparent;
+}
+.dossier-stamp{
+  position:absolute;top:1.4rem;right:1.8rem;
+  font-family:var(--font-t);font-size:.62rem;letter-spacing:.22em;color:var(--blood);
+  border:2px solid var(--blood);padding:.18em .7em;opacity:.65;
+  transform:rotate(4deg);text-transform:uppercase;
+}
+.dossier h3{
+  font-family:var(--font-d);font-size:.68rem;letter-spacing:.22em;color:var(--blood);
+  text-transform:uppercase;margin-bottom:.7rem;
+  border-bottom:1px solid rgba(0,0,0,.14);padding-bottom:.4rem;
+}
+.dossier p{font-family:var(--font-r);font-size:1rem;line-height:1.75;color:#22180a;margin-bottom:.75em;position:relative;z-index:1}
+.dossier p:first-of-type::first-letter{
+  font-family:var(--font-d);font-size:2.8em;line-height:.8;float:left;
+  margin-right:.08em;color:var(--blood);font-weight:700;
+}
+.dossier strong{color:#0e0c08}
+
+/* ─── PANEL ──────────────────────────────────── */
+.panel{
+  padding:1.3rem 1.5rem;margin-bottom:1.2rem;position:relative;
+  background:linear-gradient(135deg,var(--ink2),var(--ink3));
+}
+.panel-blood{border-left:2px solid var(--blood-bright)}
+.panel-brass{border-left:2px solid var(--brass)}
+.panel-green{border-left:2px solid var(--green);background:rgba(91,145,104,.06)}
+.panel h3{
+  font-family:var(--font-t);font-size:.68rem;letter-spacing:.22em;
+  text-transform:uppercase;margin-bottom:.7rem;
+}
+.panel-blood h3{color:var(--blood-bright)}
+.panel-brass h3{color:var(--brass)}
+.panel-green h3{color:var(--green)}
+.panel blockquote{
+  font-family:var(--font-r);font-style:italic;font-size:1.12rem;line-height:1.7;
+  color:var(--fog);margin:.6rem 0;padding-left:1rem;border-left:1px solid rgba(255,255,255,.12);
+}
+.panel p{color:var(--fog);font-size:.98rem;line-height:1.65;margin-bottom:.6em}
+
+/* ─── STAT ROW ───────────────────────────────── */
+.stat-row{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:1px;background:rgba(255,255,255,.05);margin-top:1.2rem;
+}
+.stat-cell{background:var(--ink2);padding:.8rem 1rem}
+.stat-cell-label{font-family:var(--font-t);font-size:.62rem;letter-spacing:.2em;color:var(--smoke);text-transform:uppercase;margin-bottom:.25rem}
+.stat-cell-val{font-family:var(--font-r);font-size:.95rem;color:var(--fog)}
+
+/* ─── EVIDENCE TAG ───────────────────────────── */
+.ev-tag{
+  display:inline-block;font-family:var(--font-t);font-size:.65rem;letter-spacing:.18em;
+  color:var(--brass-dim);border:1px dashed var(--brass-dim);
+  padding:.15em .6em;margin-top:.6rem;text-transform:uppercase;
+}
+
+/* ─── LOGGED CONFIRM ─────────────────────────── */
+.logged-confirm{
+  display:flex;align-items:flex-start;gap:.9rem;
+  background:rgba(91,145,104,.08);border:1px solid rgba(91,145,104,.25);
+  padding:1rem 1.2rem;margin-bottom:1.4rem;
+}
+.logged-tick{
+  color:var(--green);font-size:1.1rem;flex-shrink:0;
+  animation:tick-pop .4s .1s var(--ease-out) both;
+}
+@keyframes tick-pop{from{transform:scale(0)}to{transform:scale(1)}}
+.logged-text{font-family:var(--font-t);font-size:.78rem;letter-spacing:.04em;color:var(--fog);line-height:1.5}
+.logged-label{font-family:var(--font-d);font-size:.6rem;letter-spacing:.2em;color:var(--green);text-transform:uppercase;display:block;margin-bottom:.25rem}
+
+/* ─── CARDS ──────────────────────────────────── */
+.card{
+  background:var(--ink2);border:1px solid rgba(255,255,255,.06);
+  padding:1.3rem 1.1rem;cursor:none;position:relative;overflow:hidden;
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s;
+}
+.card::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(201,164,92,.08),transparent 60%);
+  opacity:0;transition:opacity .3s;
+}
+.card:hover{transform:translateY(-7px);border-color:var(--brass);box-shadow:0 14px 40px rgba(0,0,0,.6)}
+.card:hover::before{opacity:1}
+.card.seen::after{
+  content:'SEEN';position:absolute;top:.6rem;right:.6rem;
+  font-family:var(--font-t);font-size:.55rem;letter-spacing:.18em;
+  color:var(--brass);border:1px solid rgba(201,164,92,.4);padding:.1em .4em;
+  animation:stamp-corner .3s var(--ease-out);
+}
+@keyframes stamp-corner{from{opacity:0;transform:scale(1.4)}to{opacity:1;transform:scale(1)}}
+.card-top-blood{border-top:2px solid var(--blood)}
+.card-top-brass{border-top:2px solid var(--brass)}
+.card-top-smoke{border-top:2px solid var(--smoke)}
+.card-icon{font-size:1.7rem;margin-bottom:.65rem;display:block;line-height:1}
+.card-title{font-family:var(--font-d);font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:#e0d8cc;margin-bottom:.2rem}
+.card-sub{font-family:var(--font-t);font-size:.66rem;color:var(--smoke);letter-spacing:.06em}
+
+/* ─── MONOGRAM ───────────────────────────────── */
+.monogram{
+  width:80px;height:80px;border-radius:50%;flex-shrink:0;
+  background:radial-gradient(circle at 40% 35%,var(--brass),var(--brass-dim));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-d);font-size:1.7rem;color:var(--ink);
+  box-shadow:0 0 0 3px rgba(201,164,92,.3),0 8px 30px rgba(0,0,0,.5);
+}
+
+/* ─── SCENE WRAPPERS ─────────────────────────── */
+.scene-inner{width:100%;max-width:720px;padding:4rem 2rem;margin:0 auto}
+.scene-wide{width:100%;max-width:1100px;padding:3rem 2rem;margin:0 auto}
+.back-link{
+  font-family:var(--font-t);font-size:.72rem;letter-spacing:.18em;color:var(--smoke);
+  cursor:none;margin-bottom:2rem;display:inline-flex;align-items:center;gap:.4rem;
+  text-transform:uppercase;transition:color .2s;
+}
+.back-link:hover{color:var(--fog)}
+
+/* ════ TITLE SCENE ═══════════════════════════ */
+#scene-title{
+  justify-content:center;text-align:center;
+  background:radial-gradient(ellipse at 50% 30%,#1a1208 0%,var(--ink) 65%);
+  padding:4rem 2rem;position:relative;overflow:hidden;
+}
+.title-inner{position:relative;z-index:1;max-width:660px}
+.case-stamp{
+  display:inline-block;font-family:var(--font-t);font-size:.7rem;letter-spacing:.25em;
+  color:var(--blood-bright);border:1.5px solid var(--blood);
+  border-top:3px solid var(--blood);border-left:3px solid var(--blood);
+  padding:.3em 1em;transform:rotate(-1.5deg);text-transform:uppercase;
+  margin-bottom:2rem;
+}
+.title-word-the{display:block;font-size:.45em;letter-spacing:.4em;color:var(--fog);margin-bottom:-.15em}
+.title-word-call{color:var(--blood-bright);animation:neon-flicker 8s infinite}
+@keyframes neon-flicker{
+  0%,18%,20%,52%,54%,64%,66%,95%,96%,100%{opacity:1;text-shadow:0 0 20px var(--blood-glow)}
+  19%,53%,65%{opacity:.4;text-shadow:none}
+}
+.orn-rule{display:flex;align-items:center;gap:.8rem;margin:1.4rem auto;width:fit-content}
+.orn-rule::before,.orn-rule::after{content:'';display:block;width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--smoke))}
+.orn-diamond{color:var(--brass);font-size:.6rem}
+.title-tagline{font-family:var(--font-r);font-style:italic;font-size:1.18rem;color:var(--fog);line-height:1.65;margin-bottom:1.4rem}
+.title-dets{font-family:var(--font-t);font-size:.72rem;letter-spacing:.22em;color:var(--smoke);text-transform:uppercase;margin-bottom:2.4rem}
+.title-dets span{color:var(--brass)}
+.title-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* rise animations */
+.rise{opacity:0;animation:rise-in .6s var(--ease-out) forwards}
+@keyframes rise-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.d0{animation-delay:.15s}.d1{animation-delay:.35s}.d2{animation-delay:.6s}
+.d3{animation-delay:.9s}.d4{animation-delay:1.2s}.d5{animation-delay:1.6s}
+.d6{animation-delay:2s}.d7{animation-delay:2.5s}
+
+/* ════ HOW TO PLAY ═══════════════════════════ */
+.steps{list-style:none;margin:1.4rem 0 2rem}
+.step{display:flex;gap:1rem;margin-bottom:1.1rem;align-items:flex-start}
+.step-n{font-family:var(--font-d);font-size:1.3rem;color:var(--blood-bright);line-height:1;min-width:1.8rem}
+.step-t{font-size:1rem;color:var(--fog);line-height:1.6}
+.step-t strong{color:#ddd8cc}
+
+/* ════ HUB SCENE ═════════════════════════════ */
+.hub-header{text-align:center;margin-bottom:2.8rem;width:100%}
+.hub-header h2{color:#ddd8cc;margin-bottom:.3rem}
+.hub-progress-big{
+  font-family:var(--font-b);font-size:clamp(2rem,5vw,3rem);
+  letter-spacing:.05em;color:var(--brass);line-height:1;margin-top:.5rem;
+}
+.hub-progress-label{font-family:var(--font-t);font-size:.68rem;letter-spacing:.2em;color:var(--smoke)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(192px,1fr));gap:1rem;width:100%}
+
+/* ════ DETAIL SCENE ══════════════════════════ */
+#scene-detail{padding:3rem 2rem;max-width:760px;margin:0 auto;width:100%}
+.hero-row{display:flex;gap:1.5rem;align-items:center;margin-bottom:2rem;flex-wrap:wrap}
+.hero-meta{flex:1;min-width:180px}
+.hero-role{font-family:var(--font-t);font-size:.72rem;letter-spacing:.22em;color:var(--brass);text-transform:uppercase;margin-bottom:.3rem}
+.hero-name{font-family:var(--font-d);font-size:clamp(1.5rem,4vw,2.2rem);text-transform:uppercase;letter-spacing:.06em;color:#ddd8cc}
+.type-badge{
+  font-family:var(--font-t);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;
+  padding:.2em .8em;margin-bottom:1.2rem;display:inline-block;
+}
+.badge-s{background:var(--blood);color:var(--paper)}
+.badge-e{background:var(--brass-dim);color:var(--paper)}
+
+/* ════ NOTEBOOK SCENE ════════════════════════ */
+#scene-notebook{padding:3rem 2rem;max-width:720px;margin:0 auto;width:100%}
+.nb-paper{
+  background:var(--paper2);padding:2.5rem 2.5rem 2rem 4rem;position:relative;
+  box-shadow:0 10px 50px rgba(0,0,0,.75);min-height:360px;
+}
+.nb-paper::before{
+  content:'';position:absolute;top:0;left:3rem;bottom:0;width:1px;
+  background:rgba(200,0,0,.22);
+}
+.nb-paper::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,.08) 27px,rgba(0,0,0,.08) 28px);
+}
+.nb-title{font-family:var(--font-t);font-size:1.3rem;color:#1a1008;position:relative;z-index:1;margin-bottom:.15rem}
+.nb-sub{font-family:var(--font-t);font-size:.72rem;color:#5a4530;letter-spacing:.1em;margin-bottom:1.5rem;position:relative;z-index:1}
+.nb-entry{position:relative;z-index:1;margin-bottom:1rem;padding-left:.8rem;animation:nb-in .35s var(--ease-out)}
+@keyframes nb-in{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.nb-entry::before{content:'›';position:absolute;left:0;color:var(--brass);font-family:var(--font-d);font-size:1rem;line-height:1.2}
+.nb-entry-label{font-family:var(--font-d);font-size:.6rem;letter-spacing:.2em;color:var(--blood);text-transform:uppercase;margin-bottom:.15rem}
+.nb-entry-text{font-family:var(--font-t);font-size:.83rem;color:#22180a;line-height:1.55}
+.nb-empty{font-family:var(--font-t);font-size:.88rem;color:#8a7860;font-style:italic;position:relative;z-index:1;margin-top:1rem}
+/* timeline */
+.nb-timeline{
+  display:flex;margin-top:2rem;position:relative;z-index:1;
+  border-top:2px solid rgba(0,0,0,.15);padding-top:1.2rem;
+}
+.nb-tl-seg{flex:1;text-align:center;position:relative;padding:.4rem .2rem}
+.nb-tl-seg::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.25);
+  margin-top:-5px;
+}
+.nb-tl-seg.kill{background:rgba(124,24,24,.15);border:1px solid rgba(124,24,24,.3);border-radius:3px}
+.nb-tl-seg.kill::before{background:var(--blood)}
+.nb-tl-time{font-family:var(--font-t);font-size:.62rem;color:#5a4530;display:block}
+.nb-tl-label{font-family:var(--font-t);font-size:.6rem;color:#8a7860;display:block;margin-top:.15rem}
+.nb-tl-seg.kill .nb-tl-time{color:var(--blood);font-weight:bold}
+.nb-tl-seg.kill .nb-tl-label{color:var(--blood-bright)}
+
+/* ════ ACCUSATION SCENE ══════════════════════ */
+#scene-accusation{padding:3rem 2rem;max-width:760px;margin:0 auto;width:100%}
+.acc-warning{border:1px solid rgba(124,24,24,.5);padding:1rem 1.3rem;background:rgba(124,24,24,.06);margin-bottom:1.6rem;font-family:var(--font-t);font-size:.82rem;color:var(--fog);letter-spacing:.04em;text-align:center}
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+.pick-card{
+  background:var(--ink2);border:2px solid rgba(255,255,255,.06);
+  padding:1.2rem 1.3rem;cursor:none;transition:all .2s var(--ease);
+  display:flex;align-items:center;gap:1rem;
+}
+.pick-card:hover{border-color:rgba(196,48,43,.4);background:rgba(124,24,24,.08)}
+.pick-card.chosen{border-color:var(--blood-bright);background:rgba(124,24,24,.12);box-shadow:0 0 20px rgba(196,48,43,.15)}
+.pick-mono{
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;
+  background:radial-gradient(circle at 40% 35%,var(--blood-bright),var(--blood));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-d);font-size:1rem;color:var(--paper);
+}
+.pick-name{font-family:var(--font-d);font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;color:#ddd8cc}
+.pick-role{font-family:var(--font-t);font-size:.65rem;color:var(--smoke);letter-spacing:.08em}
+.acc-confirm{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+#confirm-btn{opacity:.3;pointer-events:none;transition:opacity .3s}
+#confirm-btn.ready{opacity:1;pointer-events:all}
+#chosen-label{font-family:var(--font-t);font-size:.75rem;color:var(--smoke);letter-spacing:.1em}
+
+/* ════ VERDICT SCENE ═════════════════════════ */
+#scene-verdict{padding:3rem 2rem;max-width:760px;margin:0 auto;width:100%;text-align:center}
+.verdict-stamp{
+  font-family:var(--font-d);font-size:clamp(2.5rem,9vw,4.5rem);letter-spacing:.15em;
+  font-weight:700;margin-bottom:.8rem;
+  animation:stamp-smash .5s cubic-bezier(.2,.8,.3,1.2) both;
+}
+@keyframes stamp-smash{from{transform:scale(2.5);opacity:0}to{transform:scale(1);opacity:1}}
+.stamp-correct{color:var(--green);text-shadow:0 0 30px rgba(91,145,104,.5)}
+.stamp-wrong{color:var(--blood-bright);text-shadow:0 0 30px var(--blood-glow)}
+.verdict-sub{font-family:var(--font-t);font-size:.78rem;letter-spacing:.2em;color:var(--smoke);margin-bottom:1.5rem;text-transform:uppercase}
+.verdict-prose{text-align:left;margin:1.2rem 0}
+.verdict-chain{list-style:none;position:relative;z-index:1}
+.verdict-chain li{
+  padding:.5rem 0 .5rem 1.5rem;border-left:2px solid var(--blood);
+  margin-bottom:.5rem;font-family:var(--font-r);font-size:.98rem;color:#22180a;line-height:1.6;position:relative;
+}
+.verdict-chain li::before{
+  content:'→';position:absolute;left:-.7rem;background:var(--paper);
+  color:var(--blood);font-size:.85rem;
+}
+.verdict-actions{display:flex;gap:1rem;justify-content:center;margin-top:2rem;flex-wrap:wrap}
+
+/* ─── UTILITIES ──────────────────────────────── */
+.mt1{margin-top:1rem}.mt2{margin-top:2rem}.mb1{margin-bottom:1rem}.mb2{margin-bottom:2rem}
+.flex-row{display:flex;gap:1rem;flex-wrap:wrap}
+.text-center{text-align:center}
+
+/* ─── REDUCED MOTION ─────────────────────────── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important}
+  #atm-rain,#atm-smoke{display:none}
+}
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media(max-width:600px){
+  .dossier,.nb-paper{padding:1.4rem 1.2rem 1.4rem 1.6rem}
+  .nb-paper::before{left:1.2rem}
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .pick-grid{grid-template-columns:1fr}
+  .title-btns,.flex-row{flex-direction:column}
+  .hero-row{flex-direction:column}
+  .stat-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- atmosphere -->
+<div id="atm-glow"></div>
+<div id="atm-rain"></div>
+<div id="atm-smoke"><span></span><span></span><span></span></div>
+
+<!-- progress bar -->
+<div id="prog-bar"><div id="prog-fill"></div></div>
+
+<!-- custom cursor -->
+<div id="cursor-ring"></div>
+<div id="cursor-dot"></div>
+
+<!-- ══════════ BOOT OVERLAY ══════════ -->
+<div id="boot">
+  <div id="boot-bureau">Calloway Street Bureau of Homicide</div>
+  <div id="boot-bar-wrap"><div id="boot-bar-fill"></div></div>
+  <div id="boot-status">Retrieving Case File №1147…</div>
+</div>
+
+<!-- ══════════ TITLE ══════════ -->
+<section class="scene" id="scene-title">
+  <div class="title-inner">
+    <div class="case-stamp rise d0">Case File №1147 — Homicide</div>
+    <h1 class="rise d1">
+      <span class="title-word-the">The</span>
+      Last <span class="title-word-call">Call</span>
+    </h1>
+    <div class="orn-rule rise d2"><span class="orn-diamond">◆</span></div>
+    <p class="title-tagline rise d3">A body in the rain. A bar that closed too quietly.<br>Two detectives, one shot at the truth.</p>
+    <div class="title-dets rise d4">Detectives <span>Shrey</span> · <span>Anoushka</span> — Homicide Division</div>
+    <div class="title-btns rise d5">
+      <button class="btn btn-blood" onclick="go('howto')"><span>Open the Case File</span></button>
+      <button class="btn btn-ghost" onclick="go('briefing')"><span>Skip to Briefing</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ HOW TO PLAY ══════════ -->
+<section class="scene" id="scene-howto">
+  <div class="scene-inner">
+    <div class="kicker">Instructions</div>
+    <h2 class="mb1">How to <span class="accent">Work the Case</span></h2>
+    <p class="color-fog">Five suspects. Six evidence exhibits. One killer. Everything resolves against the timeline.</p>
+    <ul class="steps mt1">
+      <li class="step"><span class="step-n">01</span><span class="step-t"><strong>Read the Briefing.</strong> Know the victim, the location, the kill window. It is the anchor for everything.</span></li>
+      <li class="step"><span class="step-n">02</span><span class="step-t"><strong>Work the Hub.</strong> Open every suspect file and every evidence exhibit. The notebook auto-logs hard facts as you go.</span></li>
+      <li class="step"><span class="step-n">03</span><span class="step-t"><strong>Cross-check alibis.</strong> Ask: who was where at <strong>01:40–01:50</strong>? Who can prove it? Who cannot?</span></li>
+      <li class="step"><span class="step-n">04</span><span class="step-t"><strong>Review your Notebook.</strong> All logged facts appear there, with a visual timeline. When ready, make your accusation.</span></li>
+      <li class="step"><span class="step-n">05</span><span class="step-t"><strong>Make the call.</strong> One suspect. Correct → full case logic. Wrong → pointed back without a spoiler.</span></li>
+    </ul>
+    <div class="panel panel-blood">
+      <p><strong>⚠ The mystery is genuinely solvable.</strong> Every suspect except one has a verifiable alibi for 01:40–01:50. You don't need to guess — you need to eliminate.</p>
+    </div>
+    <div class="flex-row mt2">
+      <button class="btn btn-ghost" onclick="go('title')"><span>← Back</span></button>
+      <button class="btn btn-blood" onclick="go('briefing')"><span>Read the Briefing →</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ BRIEFING ══════════ -->
+<section class="scene" id="scene-briefing">
+  <div class="scene-inner">
+    <div class="kicker">Case File 1147</div>
+    <h2 class="mb1">The <span class="accent">Blue Vesper</span> Homicide</h2>
+
+    <div class="dossier">
+      <div class="dossier-stamp">Bureau</div>
+      <h3>Scene Report</h3>
+      <p><strong>Victim:</strong> Marcus Vane, 44. Owner of <em>The Blue Vesper</em>, a jazz bar on Delancey Street. Found dead in the alley behind the building at 02:15 by a delivery driver.</p>
+      <p><strong>Cause of death:</strong> Single blunt-force blow to the posterior skull. Weapon not found at the scene — recovered later (see Evidence F). The blow was delivered from behind.</p>
+      <p><strong>Context:</strong> The bar closed at 01:30. Last call was 01:15. Vane was last seen alive near the service area at approximately 01:35, after most staff had departed.</p>
+    </div>
+
+    <div class="dossier">
+      <div class="dossier-stamp">Key Fact</div>
+      <h3>The Kill Window — 01:40 to 01:50</h3>
+      <p>Rain began at <strong>01:40</strong>. The body was fully soaked. The victim died <em>after the rain started</em>. This anchors everything: the killer was in the alley between 01:40 and 01:50.</p>
+      <p><strong>Weapon:</strong> Narrow, heavy, cylindrical object — consistent with an umbrella's weighted brass handle (see Evidence F).</p>
+      <div style="margin:1.2rem 0;border-left:2px solid var(--blood);padding-left:1.1rem">
+        <div style="font-family:var(--font-t);font-size:.82rem;color:#3a2a15;line-height:1.8">
+          <div><span style="color:var(--blood)">01:15</span> — Last call at The Blue Vesper</div>
+          <div><span style="color:var(--blood)">01:30</span> — Bar closes; staff departs</div>
+          <div><span style="color:var(--blood)">01:35</span> — Marcus seen near the service area</div>
+          <div><span style="color:var(--blood);font-weight:bold">01:40</span> — Rain begins. <strong>Kill window opens.</strong></div>
+          <div><span style="color:var(--blood);font-weight:bold">01:40–01:50</span> — Murder occurs in the alley</div>
+          <div><span style="color:var(--blood)">02:15</span> — Body discovered</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-row">
+      <button class="btn btn-ghost" onclick="go('howto')"><span>← Back</span></button>
+      <button class="btn btn-blood" onclick="go('hub')"><span>Enter the Hub →</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ HUB ══════════ -->
+<section class="scene" id="scene-hub">
+  <div class="scene-wide">
+    <div class="hub-header">
+      <div class="kicker" style="justify-content:center">Investigation Hub</div>
+      <h2>Case File 1147 — <span class="accent">The Blue Vesper</span></h2>
+      <div class="hub-progress-big" id="hub-num">0<span style="font-size:.5em;color:var(--smoke)">/11</span></div>
+      <div class="hub-progress-label">leads examined</div>
+    </div>
+
+    <div class="section-label">The Suspects — 5</div>
+    <div class="card-grid" id="suspect-grid"></div>
+
+    <div class="section-label">The Evidence — 6</div>
+    <div class="card-grid" id="evidence-grid"></div>
+
+    <div class="section-label">Case Actions</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="card card-top-brass" onclick="go('notebook')">
+        <span class="card-icon">📓</span>
+        <div class="card-title">The Notebook</div>
+        <div class="card-sub"><span id="fact-count">0</span> facts logged</div>
+      </div>
+      <div class="card card-top-blood" onclick="go('accusation')">
+        <span class="card-icon">⚖️</span>
+        <div class="card-title">Make Accusation</div>
+        <div class="card-sub">Name the killer</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ DETAIL ══════════ -->
+<section class="scene" id="scene-detail">
+  <div id="detail-mount" style="width:100%;max-width:760px;padding:3rem 2rem;margin:0 auto"></div>
+</section>
+
+<!-- ══════════ NOTEBOOK ══════════ -->
+<section class="scene" id="scene-notebook">
+  <div style="width:100%;max-width:720px;padding:3rem 2rem;margin:0 auto">
+    <div class="back-link" onclick="go('hub')">← Back to Hub</div>
+    <div class="nb-paper">
+      <div class="nb-title">Case Notes</div>
+      <div class="nb-sub">File #1147 — Detectives Shrey &amp; Anoushka</div>
+      <div id="nb-entries"></div>
+      <div class="nb-timeline">
+        <div class="nb-tl-seg"><span class="nb-tl-time">01:30</span><span class="nb-tl-label">Bar closes</span></div>
+        <div class="nb-tl-seg"><span class="nb-tl-time">01:40</span><span class="nb-tl-label">Rain begins</span></div>
+        <div class="nb-tl-seg kill"><span class="nb-tl-time">01:40–01:50</span><span class="nb-tl-label">▲ KILL WINDOW</span></div>
+        <div class="nb-tl-seg"><span class="nb-tl-time">02:15</span><span class="nb-tl-label">Body found</span></div>
+      </div>
+    </div>
+    <div class="flex-row mt2">
+      <button class="btn btn-ghost" onclick="go('hub')"><span>← Back to Hub</span></button>
+      <button class="btn btn-blood" onclick="go('accusation')"><span>Make Accusation →</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ACCUSATION ══════════ -->
+<section class="scene" id="scene-accusation">
+  <div style="width:100%;max-width:760px;padding:3rem 2rem;margin:0 auto">
+    <div class="back-link" onclick="go('hub')">← Back to Hub</div>
+    <div class="kicker">Final Accusation</div>
+    <h2 class="mb1">Name the <span class="accent">Killer</span></h2>
+    <p style="color:var(--fog);margin-bottom:1.4rem">Review your notebook. When you're certain, select a suspect and confirm. You have one call.</p>
+    <div class="acc-warning">One accusation. Choose with evidence, not instinct.</div>
+    <div class="pick-grid" id="pick-grid"></div>
+    <div class="acc-confirm">
+      <button class="btn btn-blood" id="confirm-btn" onclick="confirmAccusation()"><span>Confirm Accusation</span></button>
+      <span id="chosen-label"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ VERDICT ══════════ -->
+<section class="scene" id="scene-verdict">
+  <div id="verdict-mount" style="width:100%;max-width:760px;padding:3rem 2rem;margin:0 auto;text-align:center"></div>
+</section>
+
+<script>
+/*
+ * ════════════════════════════════════════════════════════
+ * SOLVER LOGIC — THE LAST CALL  (Case #1147)
+ * ════════════════════════════════════════════════════════
+ * KILL WINDOW: 01:40–01:50, in the alley, after rain began.
+ * Body soaked = died after 01:40. Single blow, from behind.
+ *
+ * ELIMINATION CHAIN:
+ *  [B] Cy on security camera 01:15–02:02, unbroken → CLEARED.
+ *  [C] Doorman Theodore: June exits front door 01:40,
+ *      Irene exits front door 01:45 → both CLEARED
+ *      (front door ≠ alley; killer was in the alley).
+ *  [E] Neighbor Mrs. Vanek watched the alley street-mouth
+ *      01:35–02:00: nobody came out. Heard a man + a woman
+ *      arguing after the rain started, then a thud.
+ *      → killer re-entered via the service door.
+ *      → killer is a woman.
+ *  [E] Raymond heard a woman arguing with Marcus and went
+ *      back inside — he is a witness, not the killer.
+ *  [A] No cab or rideshare pickup on Delancey St 01:20–02:00.
+ *      → Delphine's alibi ("took a cab at 01:30") is a lie.
+ *      She never left. She's the only woman unaccounted for.
+ *  [D] Struck from behind — someone Marcus trusted enough
+ *      to turn his back on. Ex-lover.
+ *  [F] Bloodied brass-handled umbrella = weapon. Only someone
+ *      in the alley after 01:40 (the rain) carrying an umbrella.
+ *
+ * CONCLUSION: DELPHINE VOSS — the only uncleared woman,
+ *  no verified exit, motive (losing her stage to the sale),
+ *  means (proximity, umbrella), opportunity (01:40–01:50 in alley).
+ * ════════════════════════════════════════════════════════
+ */
+
+var KILLER = 'delphine';
+var visited = new Set();
+var facts   = [];
+var pick    = null;
+
+/* ─── DATA ─────────────────────────────────── */
+var suspects = {
+  delphine:{
+    name:'Delphine Voss', role:'Singer / Ex-Lover', icon:'🎤', initials:'DV',
+    statement:'"I took a cab at 01:30. Ask anyone — I was done for the night. Marcus and I were finished months ago. I had no reason to stay."',
+    bg:'Delphine was the bar\'s resident jazz singer and Marcus\'s former partner. Their split turned bitter when he announced plans to sell The Blue Vesper — ending her residency, her income, her stage. She claims a cab picked her up at 01:30 from the front of the bar.',
+    stats:{exit:'Cab — 01:30 (claimed)',relation:'Ex-romantic partner',motive:'Losing residency in sale'},
+    read:['The alibi is a specific, checkable claim. Specific claims are either very true or very false. Run the cab log.',
+          'If no cab came, she never left. No exit from the front means she was still on premises — and the alley is accessible from the service door.'],
+    read_tag:'Cross-ref: Evidence A (Cab Log)',
+    fact:{label:'Suspect: Delphine',text:'Claims cab at 01:30. Motive: residency lost if bar sells. Volatile history with victim.'}
+  },
+  raymond:{
+    name:'Raymond Vane', role:'Brother / Co-signer', icon:'👤', initials:'RV',
+    statement:'"I needed air. I went out the back around 01:40. Marcus was in the alley with someone — a woman, arguing. I didn\'t want to get involved. I came back inside."',
+    bg:'Marcus\'s younger brother. Co-signed a business debt; a sale would recover some of his exposure. He admits to stepping out the back door around 01:40, hearing a woman arguing with Marcus, and returning inside without engaging.',
+    stats:{exit:'Back door ~01:40 (returned inside)',relation:'Brother / co-debtor',motive:'Debt recovery from sale'},
+    read:['He was in the alley at the exact right time — the most tempting red herring in the file.',
+          'But read his statement again: he heard a woman with Marcus. He\'s a witness who retreated. The alley witness never saw him leave by the street, consistent with his story.'],
+    read_tag:'Cross-ref: Evidence E (Alley & Witness)',
+    fact:{label:'Suspect: Raymond',text:'Back door ~01:40, heard woman arguing with Marcus, returned inside. Corroborates witness — a woman was with the victim.'}
+  },
+  cy:{
+    name:'Cy Harlan', role:'Head Bartender', icon:'🍸', initials:'CH',
+    statement:'"I was behind the bar all night, then counting the till. The camera never lies. I didn\'t go anywhere."',
+    bg:'Seven-year veteran of The Blue Vesper. No financial stake in the sale, no known grievance with Marcus. Claims he was on the floor and in the till room all evening — captured continuously on the security camera.',
+    stats:{exit:'None — on camera',relation:'Employee, 7 years',motive:'None identified'},
+    read:['If the camera places him 01:15–02:02 without a break, he\'s untouchable. Review the tape.',
+          'The security camera is the cleanest alibi in the file. If it holds, Cy is off the board entirely.'],
+    read_tag:'Cross-ref: Evidence B (Security Camera)',
+    fact:{label:'Suspect: Cy',text:'Claims camera footage confirms his position 01:15–02:02. Alibi is the tape.'}
+  },
+  irene:{
+    name:'Irene Solano', role:'Investor / Creditor', icon:'💼', initials:'IS',
+    statement:'"I left at 01:45, front door. Theodore — the doorman — saw me. I had a car waiting. Marcus owed me money. Dead men don\'t pay."',
+    bg:'Private investor who financed a renovation loan three years prior — a loan in active dispute. She was at the bar for a private meeting with Marcus that night, which she says ended without resolution. Left at 01:45 via the front entrance.',
+    stats:{exit:'Front door — 01:45',relation:'Creditor / investor',motive:'Loan recovery (weakened by death)'},
+    read:['She\'s right that killing the debtor kills the debt. A creditor wants the borrower alive.',
+          'The doorman confirmation is key. If Theodore saw her leave at 01:45 from the front, she can\'t be in the alley. The math doesn\'t work.'],
+    read_tag:'Cross-ref: Evidence C (Doorman Statement)',
+    fact:{label:'Suspect: Irene',text:'Front door 01:45, doorman witnessed. Creditor motive is self-defeating — eliminated pending doorman confirm.'}
+  },
+  june:{
+    name:'June Arroyo', role:'Bar Manager', icon:'🗂️', initials:'JA',
+    statement:'"I left just after 01:40. It had just started raining so I opened my umbrella. Theodore was right there at the door."',
+    bg:'Bar manager for four years, close working relationship with Marcus. Responsible for nightly closing. She mentions leaving at 01:40 through the front entrance, umbrella in hand, at the onset of rain. The doorman was at his post.',
+    stats:{exit:'Front door — ~01:40',relation:'Manager, 4 years',motive:'None identified'},
+    read:['The umbrella is a red herring — it\'s suggestive but the weapon was in the alley, not the front entrance.',
+          'Geography is her alibi. If the doorman places her at the front at 01:40, she cannot be in the alley at 01:40. She\'d have to be in two places simultaneously.'],
+    read_tag:'Cross-ref: Evidence C + F (Doorman, Umbrella)',
+    fact:{label:'Suspect: June',text:'Front door ~01:40, umbrella open, doorman confirmed. Front exit rules out alley — eliminated pending doorman confirm.'}
+  }
+};
+
+var evidence = {
+  A:{
+    label:'Exhibit A', title:'Cab Log', icon:'🚕', num:'A',
+    body:'A full sweep of dispatch and GPS records for licensed cabs and rideshare vehicles in a six-block radius of The Blue Vesper was conducted for the window 01:00–02:30.<br><br><strong>No pickup was recorded at or near the bar between 01:20 and 02:00.</strong> No driver logged a fare from that address. Platform records confirmed: no active trip originating from Delancey Street in that window. The request simply was not made.',
+    hard:'No cab or rideshare ever came for Delphine. Her stated alibi — "I took a cab at 01:30" — is false. She never left the premises.',
+    tag:'Eliminates: Delphine\'s alibi',
+    fact:{label:'Evidence A — Cab Log',text:'No pickup on Delancey St 01:20–02:00. Delphine\'s alibi is fabricated. She never left.'}
+  },
+  B:{
+    label:'Exhibit B', title:'Security Camera Footage', icon:'📷', num:'B',
+    body:'The Blue Vesper\'s internal camera system covered the service corridor, bar back, and till room. <strong>Cy Harlan appears on camera from 01:15 through 02:02 without interruption.</strong> He is seen closing the register, restocking shelves, and counting the till across multiple angles.<br><br>A second camera covering the front entrance shows no ingress or egress during the 01:40–01:50 window. <strong>The front door was unused during the kill window.</strong>',
+    hard:'Cy is cleared — continuous camera coverage 01:15–02:02. The front entrance was unused during the kill window.',
+    tag:'Eliminates: Cy / Confirms: front door unused 01:40–01:50',
+    fact:{label:'Evidence B — Camera',text:'Cy on camera 01:15–02:02, unbroken. Front door unused 01:40–01:50. Cy eliminated.'}
+  },
+  C:{
+    label:'Exhibit C', title:'Doorman Statement', icon:'🚪', num:'C',
+    body:'"I was at my post by the front entrance all night. I saw June Arroyo leave just after 01:40 — she had an umbrella, nodded to me on the way out. Irene Solano left at 01:45; she seemed tense but said goodnight. I didn\'t see anyone else go in or out after that until the police arrived. I\'d have known if someone tried to come back in — I was right there the whole time."<br><br><em>— Theodore Marsh, Doorman, on duty until 02:00</em>',
+    hard:'June left the front door at 01:40, Irene at 01:45 — both documented by the doorman. Neither was in the alley during the kill window.',
+    tag:'Eliminates: June, Irene',
+    fact:{label:'Evidence C — Doorman',text:'June out front ~01:40, Irene out front ~01:45. Neither was in the alley. Both eliminated.'}
+  },
+  D:{
+    label:'Exhibit D', title:"Coroner's Note", icon:'🔬', num:'D',
+    body:'Victim sustained a single blunt-force impact to the posterior cranium. The strike pattern is consistent with a narrow, weighted cylindrical object — approximately 28–32mm in diameter. <strong>The blow was delivered from behind, with the attacker at or slightly below the victim\'s height.</strong><br><br>Death was rapid. Core body temperature and clothing saturation confirm time of death between <strong>01:40 and 01:50</strong>. The victim was struck after rain began — his clothes were fully saturated, not merely damp.',
+    hard:'Single blow, from behind, narrow heavy object. TOD 01:40–01:50. The killer approached from behind — the victim did not see it coming. Someone he trusted enough to turn his back on.',
+    tag:'Confirms: kill window, weapon profile, approach from behind',
+    fact:{label:'Evidence D — Coroner',text:'Single blow from behind, narrow heavy object, TOD 01:40–01:50. Attacker came from behind — victim trusted enough to turn his back.'}
+  },
+  E:{
+    label:'Exhibit E', title:'Alley & Witness', icon:'🏚️', num:'E',
+    body:'<strong>Alley layout:</strong> The alley behind The Blue Vesper has exactly two exits — the service door into the bar, and the street mouth onto Crane Alley. No ladders, no side passages, no other egress.<br><br><strong>Witness — Mrs. Petra Vanek (apartment overlooking Crane Alley):</strong><br>"I couldn\'t sleep. I was at my window from about 01:35 until well after 02:00. I heard the rain start. Maybe five or ten minutes later I heard a man and a woman — voices raised, the woman especially. Then a thud. Then nothing. <strong>I never saw anyone come out of that alley onto the street. Not once.</strong> If someone had walked past my window I\'d have seen them."',
+    hard:'No one left by the street exit. The killer returned via the service door. A woman\'s voice was heard arguing with Marcus. Raymond corroborates. The killer is a woman who re-entered through the bar.',
+    tag:'Establishes: killer is a woman / killer used service door',
+    fact:{label:'Evidence E — Alley Witness',text:'Killer never left by street mouth — re-entered through service door. A woman argued with Marcus. Killer is a woman.'}
+  },
+  F:{
+    label:'Exhibit F', title:'The Umbrella', icon:'☂️', num:'F',
+    body:'A black umbrella with a <strong>weighted brass handle</strong> was recovered from behind a dumpster at the far end of the alley at 02:30. The handle bears blood consistent with the victim\'s type (DNA confirmation pending). The umbrella\'s diameter and weight are consistent with the coroner\'s wound profile.<br><br><strong>The canopy was wet and half-open</strong> — consistent with being used in the rain before 01:50. No prints recovered; the brass handle was wiped clean. No identifying markings on the exterior.',
+    hard:'The murder weapon is an umbrella with a weighted brass handle — carried into the alley after the rain started at 01:40, used to strike Marcus from behind, then wiped and discarded. Only someone in the alley after 01:40 with an umbrella could have done it.',
+    tag:'Confirms: weapon / requires: umbrella in alley after 01:40',
+    fact:{label:'Evidence F — The Umbrella',text:'Bloodied brass-handled umbrella is the weapon. Carried in after rain began (01:40). Wiped clean. Killer brought an umbrella into the alley.'}
+  }
+};
+
+var verdicts = {
+  correct:{
+    chain:[
+      '[B] Cy Harlan on camera 01:15–02:02, unbroken. <strong>Eliminated.</strong>',
+      '[C] Irene Solano exits front door 01:45 — doorman witnessed. <strong>Eliminated.</strong>',
+      '[C] June Arroyo exits front door 01:40, umbrella in hand — doorman witnessed. <strong>Eliminated.</strong> (The umbrella is a deliberate misdirection.)',
+      '[E] Mrs. Vanek watched the Crane Alley street mouth 01:35–02:00. No one came out. Raymond heard a woman with Marcus and went back inside — he is a witness, not the killer.',
+      '[A] No cab or rideshare came for Delphine. Her alibi is fabricated. <strong>She never left.</strong>',
+      '[E] The killer is a woman — Vanek heard her voice. Delphine is the only woman unaccounted for.',
+      '[D+F] Struck from behind with a brass-handled umbrella — the blow of someone Marcus trusted enough to turn away from. An ex-lover.',
+      'Delphine followed Marcus into the alley. She confronted him about the sale. He turned his back. She swung. She walked back through the service door.',
+      '<strong>Motive:</strong> Marcus was selling The Blue Vesper. Delphine\'s residency — her stage, her income, her identity — died with that sale.'
+    ],
+    close:'The cab was the tell. Specific lies always are.'
+  },
+  wrong:{
+    raymond:'Raymond was in the alley — which makes him the most tempting wrong answer. But Evidence E settles it: Mrs. Vanek heard a <em>woman\'s</em> voice. Raymond\'s own statement says the same. He went back inside. He is a reluctant witness, not the killer. Return to the Hub and check the witness account carefully.',
+    cy:'The camera doesn\'t lie. Evidence B places Cy continuously on camera 01:15–02:02. He was never in the alley. Return to Evidence B.',
+    irene:'A dead debtor can\'t repay a loan — Irene\'s own logic exonerates her. Beyond motive, the doorman places her at the front exit at 01:45. She was not in the alley. Review Evidence C.',
+    june:'The umbrella in June\'s hand is deliberate misdirection. The doorman places her at the front entrance at 01:40 — not the alley. She cannot be in two places at once. Review Evidence C and E together.'
+  }
+};
+
+/* ─── SCENE ROUTING ─────────────────────────── */
+function go(id){
+  document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('active')});
+  var el = document.getElementById('scene-'+id);
+  if(el){el.classList.add('active'); window.scrollTo(0,0)}
+  if(id==='hub')        renderHub();
+  if(id==='notebook')   renderNotebook();
+  if(id==='accusation') renderPicks();
+  updateProg();
+}
+
+function updateProg(){
+  var total=11, done=visited.size, pct=Math.round(done/total*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+}
+
+/* ─── HUB ───────────────────────────────────── */
+function renderHub(){
+  var sg=document.getElementById('suspect-grid');
+  var eg=document.getElementById('evidence-grid');
+  sg.innerHTML=''; eg.innerHTML='';
+
+  Object.keys(suspects).forEach(function(k){
+    var s=suspects[k], v=visited.has('s-'+k);
+    var d=document.createElement('div');
+    d.className='card card-top-blood'+(v?' seen':'');
+    d.innerHTML='<span class="card-icon">'+s.icon+'</span>'
+      +'<div class="card-title">'+s.name+'</div>'
+      +'<div class="card-sub">'+s.role+'</div>';
+    d.addEventListener('click',function(){openDetail('s',k)});
+    d.addEventListener('mousemove',spotMove);
+    sg.appendChild(d);
+  });
+
+  Object.keys(evidence).forEach(function(k){
+    var e=evidence[k], v=visited.has('e-'+k);
+    var d=document.createElement('div');
+    d.className='card card-top-brass'+(v?' seen':'');
+    d.innerHTML='<span class="card-icon">'+e.icon+'</span>'
+      +'<div class="card-title">'+e.label+'</div>'
+      +'<div class="card-sub">'+e.title+'</div>';
+    d.addEventListener('click',function(){openDetail('e',k)});
+    d.addEventListener('mousemove',spotMove);
+    eg.appendChild(d);
+  });
+
+  document.getElementById('hub-num').innerHTML=visited.size+'<span style="font-size:.5em;color:var(--smoke)">/11</span>';
+  document.getElementById('fact-count').textContent=facts.length;
+}
+
+function spotMove(ev){
+  var r=ev.currentTarget.getBoundingClientRect();
+  var x=Math.round((ev.clientX-r.left)/r.width*100);
+  var y=Math.round((ev.clientY-r.top)/r.height*100);
+  ev.currentTarget.style.setProperty('--mx',x+'%');
+  ev.currentTarget.style.setProperty('--my',y+'%');
+}
+
+/* ─── DETAIL ─────────────────────────────────── */
+function openDetail(type,key){
+  var id=type+'-'+key;
+  if(!visited.has(id)){
+    visited.add(id);
+    var f=type==='s'?suspects[key].fact:evidence[key].fact;
+    logFact(f);
+  }
+  document.getElementById('detail-mount').innerHTML=buildDetail(type,key);
+  go('detail');
+}
+
+function logFact(f){
+  for(var i=0;i<facts.length;i++){if(facts[i].label===f.label)return}
+  facts.push(f);
+}
+
+function buildDetail(type,key){
+  var html='<div class="back-link" onclick="go(\'hub\')">← Back to Hub</div>';
+  if(type==='s'){
+    var s=suspects[key];
+    html+='<span class="type-badge badge-s">Suspect</span>'
+      +'<div class="hero-row">'
+      +'<div class="monogram">'+s.initials+'</div>'
+      +'<div class="hero-meta"><div class="hero-role">'+s.role+'</div><div class="hero-name">'+s.name+'</div></div>'
+      +'</div>'
+      +'<div class="panel panel-blood">'
+      +'<h3>Statement</h3>'
+      +'<blockquote>'+s.statement+'</blockquote>'
+      +'</div>'
+      +'<div class="dossier"><div class="dossier-stamp">Bureau</div><h3>Background</h3><p>'+s.bg+'</p>'
+      +'<div class="stat-row">'
+      +'<div class="stat-cell"><div class="stat-cell-label">Claimed Exit</div><div class="stat-cell-val">'+s.stats.exit+'</div></div>'
+      +'<div class="stat-cell"><div class="stat-cell-label">Relationship</div><div class="stat-cell-val">'+s.stats.relation+'</div></div>'
+      +'<div class="stat-cell"><div class="stat-cell-label">Motive</div><div class="stat-cell-val">'+s.stats.motive+'</div></div>'
+      +'</div></div>'
+      +'<div class="panel panel-brass"><h3>Detectives\' Read — Shrey &amp; Anoushka</h3>'
+      +s.read.map(function(r){return '<p>'+r+'</p>'}).join('')
+      +'<div class="ev-tag">'+s.read_tag+'</div>'
+      +'</div>'
+      +'<div class="logged-confirm">'
+      +'<span class="logged-tick">✓</span>'
+      +'<div class="logged-text"><span class="logged-label">Filed in the Notebook</span>'+s.fact.text+'</div>'
+      +'</div>';
+  } else {
+    var e=evidence[key];
+    html+='<span class="type-badge badge-e">'+e.label+'</span>'
+      +'<h2 style="color:#ddd8cc;margin-bottom:.3rem">'+e.title+'</h2>'
+      +'<div class="section-label" style="margin-top:.5rem">Exhibit '+e.num+'</div>'
+      +'<div class="dossier"><div class="dossier-stamp">Lab</div><h3>Contents</h3><p>'+e.body+'</p>'
+      +'<h3>Confirmed Fact</h3><p><strong>'+e.hard+'</strong></p>'
+      +'</div>'
+      +'<div class="panel panel-green"><h3>Logged to Notebook</h3>'
+      +'<blockquote>'+e.fact.text+'</blockquote>'
+      +'<div class="ev-tag">'+e.tag+'</div>'
+      +'</div>'
+      +'<div class="logged-confirm">'
+      +'<span class="logged-tick">✓</span>'
+      +'<div class="logged-text"><span class="logged-label">Filed in the Notebook</span>'+e.fact.text+'</div>'
+      +'</div>';
+  }
+  return html;
+}
+
+/* ─── NOTEBOOK ──────────────────────────────── */
+function renderNotebook(){
+  var el=document.getElementById('nb-entries');
+  if(facts.length===0){
+    el.innerHTML='<div class="nb-empty">No facts logged yet. Examine suspects and evidence from the Hub.</div>';
+    return;
+  }
+  el.innerHTML=facts.map(function(f){
+    return '<div class="nb-entry">'
+      +'<div class="nb-entry-label">'+f.label+'</div>'
+      +'<div class="nb-entry-text">'+f.text+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+/* ─── PICKS ─────────────────────────────────── */
+function renderPicks(){
+  pick=null;
+  document.getElementById('confirm-btn').classList.remove('ready');
+  document.getElementById('chosen-label').textContent='';
+  var el=document.getElementById('pick-grid');
+  el.innerHTML=Object.keys(suspects).map(function(k){
+    var s=suspects[k];
+    return '<div class="pick-card" id="pk-'+k+'" onclick="selectPick(\''+k+'\')">'
+      +'<div class="pick-mono">'+s.initials+'</div>'
+      +'<div><div class="pick-name">'+s.name+'</div><div class="pick-role">'+s.role+'</div></div>'
+      +'</div>';
+  }).join('');
+}
+
+function selectPick(k){
+  pick=k;
+  document.querySelectorAll('.pick-card').forEach(function(c){c.classList.remove('chosen')});
+  var el=document.getElementById('pk-'+k);
+  if(el)el.classList.add('chosen');
+  document.getElementById('confirm-btn').classList.add('ready');
+  document.getElementById('chosen-label').textContent='Selected: '+suspects[k].name;
+}
+
+/* ─── VERDICT ────────────────────────────────── */
+function confirmAccusation(){
+  if(!pick)return;
+  renderVerdict(pick);
+  go('verdict');
+}
+
+function renderVerdict(choice){
+  var el=document.getElementById('verdict-mount');
+  if(choice===KILLER){
+    var v=verdicts.correct;
+    el.innerHTML='<div class="verdict-stamp stamp-correct">CASE CLOSED</div>'
+      +'<div class="verdict-sub">— Delphine Voss — The Singer — The Ex-Lover —</div>'
+      +'<div class="verdict-prose">'
+      +'<div class="dossier"><div class="dossier-stamp" style="border-color:var(--green);color:var(--green)">Closed</div>'
+      +'<h3>The Elimination Chain</h3>'
+      +'<ul class="verdict-chain">'+v.chain.map(function(c){return '<li>'+c+'</li>'}).join('')+'</ul>'
+      +'<p style="margin-top:1.2rem;font-style:italic;position:relative;z-index:1">'+v.close+'</p>'
+      +'</div></div>'
+      +'<div class="verdict-actions">'
+      +'<button class="btn btn-ghost" onclick="restart()"><span>Restart Case</span></button>'
+      +'<button class="btn btn-ghost" onclick="go(\'notebook\')"><span>Review Notebook</span></button>'
+      +'</div>';
+  } else {
+    var wt=verdicts.wrong[choice]||'That is not the killer. Return to the evidence and re-examine.';
+    el.innerHTML='<div class="verdict-stamp stamp-wrong">WRONG CALL</div>'
+      +'<div class="verdict-sub">— That suspect is not the killer —</div>'
+      +'<div class="verdict-prose">'
+      +'<div class="dossier"><div class="dossier-stamp">Open</div>'
+      +'<h3>Why Not</h3><p>'+wt+'</p>'
+      +'</div></div>'
+      +'<div class="verdict-actions">'
+      +'<button class="btn btn-blood" onclick="go(\'accusation\')"><span>Reconsider</span></button>'
+      +'<button class="btn btn-ghost" onclick="go(\'notebook\')"><span>Re-read Notebook</span></button>'
+      +'</div>';
+  }
+}
+
+/* ─── RESTART ────────────────────────────────── */
+function restart(){
+  visited.clear(); facts.length=0; pick=null;
+  go('title');
+}
+
+/* ─── CUSTOM CURSOR ──────────────────────────── */
+(function(){
+  var dot=document.getElementById('cursor-dot');
+  var ring=document.getElementById('cursor-ring');
+  if(!dot||!ring)return;
+  var mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY});
+  var LERP=.18;
+  function loop(){
+    rx+=(mx-rx)*LERP; ry+=(my-ry)*LERP;
+    dot.style.left=mx+'px'; dot.style.top=my+'px';
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var hots='a,.btn,.card,.back-link,.pick-card,button,.back,.hint-toggle';
+  document.addEventListener('mouseover',function(e){
+    if(e.target.closest(hots))ring.classList.add('hot');
+  });
+  document.addEventListener('mouseout',function(e){
+    if(e.target.closest(hots))ring.classList.remove('hot');
+  });
+})();
+
+/* ─── BOOT SEQUENCE ──────────────────────────── */
+(function(){
+  var boot=document.getElementById('boot');
+  var fill=document.getElementById('boot-bar-fill');
+  var status=document.getElementById('boot-status');
+  var msgs=['Retrieving Case File ’1147…','Decrypting witness statements…','Dusting for prints…','File ready.'];
+  var mi=0;
+  function cycle(){
+    mi=(mi+1)%msgs.length;
+    status.textContent=msgs[mi];
+  }
+  var si=setInterval(cycle,620);
+  setTimeout(function(){fill.style.width='100%'},50);
+  setTimeout(function(){
+    clearInterval(si);
+    status.textContent='File ready.';
+    setTimeout(function(){
+      boot.classList.add('gone');
+      go('title');
+    },500);
+  },2900);
+})();
+</script>
+</body>
+</html>
