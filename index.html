@@ -695,111 +695,110 @@ p{margin-bottom:.85em}
  * Body soaked = died after 01:40. Single blow, from behind.
  *
  * ELIMINATION CHAIN:
- *  [B] Cy on security camera 01:15–02:02, unbroken → CLEARED.
- *  [C] Doorman Theodore: June exits front door 01:40,
- *      Irene exits front door 01:45 → both CLEARED
- *      (front door ≠ alley; killer was in the alley).
+ *  [B] Yohaan on security camera 01:15–02:02, unbroken → CLEARED.
+ *  [A] Cab log CONFIRMS Prachi's pickup at 01:30 on Delancey St.
+ *      She was in transit during the kill window → CLEARED.
+ *  [C] Doorman Theodore: Samkeet exits front door 01:40 → CLEARED.
+ *      Aparna claims 01:45 front exit — but Theodore never mentions
+ *      seeing her leave. Her departure is unverified.
  *  [E] Neighbor Mrs. Vanek watched the alley street-mouth
  *      01:35–02:00: nobody came out. Heard a man + a woman
  *      arguing after the rain started, then a thud.
  *      → killer re-entered via the service door.
  *      → killer is a woman.
- *  [E] Raymond heard a woman arguing with Marcus and went
+ *  [E] Aditya heard a woman arguing with Marcus and went
  *      back inside — he is a witness, not the killer.
- *  [A] No cab or rideshare pickup on Delancey St 01:20–02:00.
- *      → Delphine's alibi ("took a cab at 01:30") is a lie.
- *      She never left. She's the only woman unaccounted for.
  *  [D] Struck from behind — someone Marcus trusted enough
- *      to turn his back on. Ex-lover.
+ *      to turn his back on. A creditor he owed money to.
  *  [F] Bloodied brass-handled umbrella = weapon. Only someone
  *      in the alley after 01:40 (the rain) carrying an umbrella.
  *
- * CONCLUSION: DELPHINE VOSS — the only uncleared woman,
- *  no verified exit, motive (losing her stage to the sale),
+ * CONCLUSION: APARNA — the only uncleared woman,
+ *  no verified exit, motive (sale would dissolve her loan claim),
  *  means (proximity, umbrella), opportunity (01:40–01:50 in alley).
  * ════════════════════════════════════════════════════════
  */
 
-var KILLER = 'delphine';
+var KILLER = 'aparna';
 var visited = new Set();
 var facts   = [];
 var pick    = null;
 
 /* ─── DATA ─────────────────────────────────── */
 var suspects = {
-  delphine:{
-    name:'Delphine Voss', role:'Singer / Ex-Lover', icon:'🎤', initials:'DV',
-    statement:'"I took a cab at 01:30. Ask anyone — I was done for the night. Marcus and I were finished months ago. I had no reason to stay."',
-    bg:'Delphine was the bar\'s resident jazz singer and Marcus\'s former partner. Their split turned bitter when he announced plans to sell The Blue Vesper — ending her residency, her income, her stage. She claims a cab picked her up at 01:30 from the front of the bar.',
+  prachi:{
+    name:'Prachi', role:'Singer / Ex-Lover', icon:'🎤', initials:'PR',
+    statement:'"I took a cab at 01:30. Check the records if you like — I was gone before anything happened. Marcus and I had our history but that was long over."',
+    bg:'Prachi was the bar\'s resident jazz singer and Marcus\'s former partner. Their split was bitter — the sale would have ended her residency. She claims a cab picked her up at 01:30 from the front of the bar. She has strong motive but insists the cab records will prove she left.',
     stats:{exit:'Cab — 01:30 (claimed)',relation:'Ex-romantic partner',motive:'Losing residency in sale'},
-    read:['The alibi is a specific, checkable claim. Specific claims are either very true or very false. Run the cab log.',
-          'If no cab came, she never left. No exit from the front means she was still on premises — and the alley is accessible from the service door.'],
+    read:['Strong motive, and the history with Marcus makes her easy to suspect. But she\'s confident about the cab.',
+          'Run the log. If a cab did come at 01:30, she was in transit during the kill window and this alibi is solid.'],
     read_tag:'Cross-ref: Evidence A (Cab Log)',
-    fact:{label:'Suspect: Delphine',text:'Claims cab at 01:30. Motive: residency lost if bar sells. Volatile history with victim.'}
+    fact:{label:'Suspect: Prachi',text:'Claims cab at 01:30. Motive exists — residency lost in sale. Alibi depends entirely on the cab log.'}
   },
-  raymond:{
-    name:'Raymond Vane', role:'Brother / Co-signer', icon:'👤', initials:'RV',
-    statement:'"I needed air. I went out the back around 01:40. Marcus was in the alley with someone — a woman, arguing. I didn\'t want to get involved. I came back inside."',
-    bg:'Marcus\'s younger brother. Co-signed a business debt; a sale would recover some of his exposure. He admits to stepping out the back door around 01:40, hearing a woman arguing with Marcus, and returning inside without engaging.',
+  aditya:{
+    name:'Aditya', role:'Brother / Co-signer', icon:'👤', initials:'AD',
+    statement:'"I needed air. I went out the back around 01:40. Marcus was in the alley with someone — a woman, arguing. I didn\'t want to get involved. I came back inside after a couple of minutes."',
+    bg:'Marcus\'s younger brother. Co-signed a significant business debt; the bar sale would recover part of his exposure. He admits to stepping out the back door around 01:40, hearing a woman arguing with Marcus, and returning inside without engaging. He never saw the street exit.',
     stats:{exit:'Back door ~01:40 (returned inside)',relation:'Brother / co-debtor',motive:'Debt recovery from sale'},
-    read:['He was in the alley at the exact right time — the most tempting red herring in the file.',
-          'But read his statement again: he heard a woman with Marcus. He\'s a witness who retreated. The alley witness never saw him leave by the street, consistent with his story.'],
+    read:['He was in the alley at the right time — the most tempting red herring in the file.',
+          'But read his statement carefully: he heard a woman with Marcus. He\'s a witness who retreated. The alley witness corroborates — no one left by the street.'],
     read_tag:'Cross-ref: Evidence E (Alley & Witness)',
-    fact:{label:'Suspect: Raymond',text:'Back door ~01:40, heard woman arguing with Marcus, returned inside. Corroborates witness — a woman was with the victim.'}
+    fact:{label:'Suspect: Aditya',text:'Back door ~01:40, heard woman arguing with Marcus, returned inside. Corroborates witness — a woman was with the victim.'}
   },
-  cy:{
-    name:'Cy Harlan', role:'Head Bartender', icon:'🍸', initials:'CH',
+  yohaan:{
+    name:'Yohaan', role:'Head Bartender', icon:'🍸', initials:'YO',
     statement:'"I was behind the bar all night, then counting the till. The camera never lies. I didn\'t go anywhere."',
     bg:'Seven-year veteran of The Blue Vesper. No financial stake in the sale, no known grievance with Marcus. Claims he was on the floor and in the till room all evening — captured continuously on the security camera.',
     stats:{exit:'None — on camera',relation:'Employee, 7 years',motive:'None identified'},
     read:['If the camera places him 01:15–02:02 without a break, he\'s untouchable. Review the tape.',
-          'The security camera is the cleanest alibi in the file. If it holds, Cy is off the board entirely.'],
+          'The security camera is the cleanest alibi in the file. If it holds, Yohaan is off the board entirely.'],
     read_tag:'Cross-ref: Evidence B (Security Camera)',
-    fact:{label:'Suspect: Cy',text:'Claims camera footage confirms his position 01:15–02:02. Alibi is the tape.'}
+    fact:{label:'Suspect: Yohaan',text:'Claims camera footage confirms his position 01:15–02:02. Alibi is the tape.'}
   },
-  irene:{
-    name:'Irene Solano', role:'Investor / Creditor', icon:'💼', initials:'IS',
-    statement:'"I left at 01:45, front door. Theodore — the doorman — saw me. I had a car waiting. Marcus owed me money. Dead men don\'t pay."',
-    bg:'Private investor who financed a renovation loan three years prior — a loan in active dispute. She was at the bar for a private meeting with Marcus that night, which she says ended without resolution. Left at 01:45 via the front entrance.',
-    stats:{exit:'Front door — 01:45',relation:'Creditor / investor',motive:'Loan recovery (weakened by death)'},
-    read:['She\'s right that killing the debtor kills the debt. A creditor wants the borrower alive.',
-          'The doorman confirmation is key. If Theodore saw her leave at 01:45 from the front, she can\'t be in the alley. The math doesn\'t work.'],
+  aparna:{
+    name:'Aparna', role:'Investor / Creditor', icon:'💼', initials:'AP',
+    statement:'"I left at 01:45 through the front door. Theodore was there — he saw me. Marcus owed me a great deal of money. I needed him alive to collect it."',
+    bg:'Private investor who financed a renovation loan three years prior — a loan in active dispute. She was at the bar for a private meeting with Marcus that ended bitterly. She claims to have left at 01:45 via the front entrance. Critically, the pending sale was to a buyer who planned to restructure debts — Aparna\'s loan would have been written down to almost nothing.',
+    stats:{exit:'Front door — 01:45 (claimed)',relation:'Creditor / investor',motive:'Sale would extinguish her loan claim'},
+    read:['She says the doorman will confirm her exit — but check the doorman\'s statement word for word.',
+          'And reconsider her motive: if the buyer writes off her loan, she collects nothing. Stopping the sale permanently is worth more than waiting.'],
     read_tag:'Cross-ref: Evidence C (Doorman Statement)',
-    fact:{label:'Suspect: Irene',text:'Front door 01:45, doorman witnessed. Creditor motive is self-defeating — eliminated pending doorman confirm.'}
+    fact:{label:'Suspect: Aparna',text:'Claims front door exit at 01:45. Motive: sale would wipe her loan claim. Alibi rests entirely on the doorman — check his exact words.'}
   },
-  june:{
-    name:'June Arroyo', role:'Bar Manager', icon:'🗂️', initials:'JA',
-    statement:'"I left just after 01:40. It had just started raining so I opened my umbrella. Theodore was right there at the door."',
-    bg:'Bar manager for four years, close working relationship with Marcus. Responsible for nightly closing. She mentions leaving at 01:40 through the front entrance, umbrella in hand, at the onset of rain. The doorman was at his post.',
+  samkeet:{
+    name:'Samkeet', role:'Bar Manager', icon:'🗂️', initials:'SK',
+    statement:'"I left just after 01:40. It had just started raining so I opened my umbrella. Theodore was right there — he saw me go."',
+    bg:'Bar manager for four years with a close working relationship with Marcus. Responsible for nightly closing procedures. Samkeet left at 01:40 through the front entrance, umbrella in hand, at the start of the rain. The doorman was at his post and specifically recalls the moment.',
     stats:{exit:'Front door — ~01:40',relation:'Manager, 4 years',motive:'None identified'},
-    read:['The umbrella is a red herring — it\'s suggestive but the weapon was in the alley, not the front entrance.',
-          'Geography is her alibi. If the doorman places her at the front at 01:40, she cannot be in the alley at 01:40. She\'d have to be in two places simultaneously.'],
+    read:['The umbrella is tempting — but the weapon was in the alley. Samkeet was at the front, not the alley.',
+          'Geography closes this one. The doorman specifically places Samkeet at the front door at 01:40. He cannot be in the alley simultaneously.'],
     read_tag:'Cross-ref: Evidence C + F (Doorman, Umbrella)',
-    fact:{label:'Suspect: June',text:'Front door ~01:40, umbrella open, doorman confirmed. Front exit rules out alley — eliminated pending doorman confirm.'}
+    fact:{label:'Suspect: Samkeet',text:'Front door ~01:40, umbrella open, doorman explicitly confirmed. Cannot be in alley simultaneously — eliminated.'}
   }
 };
 
 var evidence = {
   A:{
     label:'Exhibit A', title:'Cab Log', icon:'🚕', num:'A',
-    body:'A full sweep of dispatch and GPS records for licensed cabs and rideshare vehicles in a six-block radius of The Blue Vesper was conducted for the window 01:00–02:30.<br><br><strong>No pickup was recorded at or near the bar between 01:20 and 02:00.</strong> No driver logged a fare from that address. Platform records confirmed: no active trip originating from Delancey Street in that window. The request simply was not made.',
-    hard:'No cab or rideshare ever came for Delphine. Her stated alibi — "I took a cab at 01:30" — is false. She never left the premises.',
-    tag:'Eliminates: Delphine\'s alibi',
-    fact:{label:'Evidence A — Cab Log',text:'No pickup on Delancey St 01:20–02:00. Delphine\'s alibi is fabricated. She never left.'}
+    body:'A full sweep of dispatch and GPS records for licensed cabs and rideshare vehicles in a six-block radius of The Blue Vesper was conducted for the window 01:00–02:30.<br><br><strong>One pickup was recorded at 01:31 on Delancey Street.</strong> A licensed cab, dispatch ID #4492, collected a single fare from the front of The Blue Vesper at 01:31 and departed northbound. The fare was dropped at Meridian Apartments at 01:49 — well outside the kill window. Platform records show no other activity on Delancey Street until after 02:00.',
+    hard:'A cab did come for Prachi. She was collected at 01:31 and was in transit during the entire kill window (01:40–01:50). Prachi is cleared.',
+    tag:'Clears: Prachi — confirmed in transit during kill window',
+    fact:{label:'Evidence A — Cab Log',text:'Cab #4492 confirms Prachi\'s pickup at 01:31. She was in transit 01:31–01:49. Cleared — cannot be in the alley.'}
   },
   B:{
     label:'Exhibit B', title:'Security Camera Footage', icon:'📷', num:'B',
-    body:'The Blue Vesper\'s internal camera system covered the service corridor, bar back, and till room. <strong>Cy Harlan appears on camera from 01:15 through 02:02 without interruption.</strong> He is seen closing the register, restocking shelves, and counting the till across multiple angles.<br><br>A second camera covering the front entrance shows no ingress or egress during the 01:40–01:50 window. <strong>The front door was unused during the kill window.</strong>',
-    hard:'Cy is cleared — continuous camera coverage 01:15–02:02. The front entrance was unused during the kill window.',
-    tag:'Eliminates: Cy / Confirms: front door unused 01:40–01:50',
-    fact:{label:'Evidence B — Camera',text:'Cy on camera 01:15–02:02, unbroken. Front door unused 01:40–01:50. Cy eliminated.'}
+    body:'The Blue Vesper\'s internal camera system covered the service corridor, bar back, and till room. <strong>Yohaan appears on camera from 01:15 through 02:02 without interruption.</strong> He is seen closing the register, restocking shelves, and counting the till across multiple angles.<br><br>A second camera covering the front entrance shows no ingress or egress during the 01:40–01:50 window. <strong>The front door was unused during the kill window.</strong>',
+    hard:'Yohaan is cleared — continuous camera coverage 01:15–02:02. The front entrance was unused during the kill window.',
+    tag:'Clears: Yohaan / Confirms: front door unused 01:40–01:50',
+    fact:{label:'Evidence B — Camera',text:'Yohaan on camera 01:15–02:02, unbroken. Front door unused 01:40–01:50. Yohaan eliminated.'}
   },
   C:{
     label:'Exhibit C', title:'Doorman Statement', icon:'🚪', num:'C',
-    body:'"I was at my post by the front entrance all night. I saw June Arroyo leave just after 01:40 — she had an umbrella, nodded to me on the way out. Irene Solano left at 01:45; she seemed tense but said goodnight. I didn\'t see anyone else go in or out after that until the police arrived. I\'d have known if someone tried to come back in — I was right there the whole time."<br><br><em>— Theodore Marsh, Doorman, on duty until 02:00</em>',
-    hard:'June left the front door at 01:40, Irene at 01:45 — both documented by the doorman. Neither was in the alley during the kill window.',
-    tag:'Eliminates: June, Irene',
-    fact:{label:'Evidence C — Doorman',text:'June out front ~01:40, Irene out front ~01:45. Neither was in the alley. Both eliminated.'}
+    body:'"I was at my post by the front entrance all night. I clearly remember Samkeet leaving just after 01:40 — he had an umbrella, nodded on the way out. After that I didn\'t see anyone else use the front door until the police arrived. I\'d have known — I was right there."<br><br>When asked specifically about Aparna: <strong>"I honestly can\'t say I saw her leave. I remember her being inside earlier in the evening, but I don\'t have a clear memory of her going out the front. It\'s possible she left when I stepped away briefly, but I can\'t confirm it."</strong><br><br><em>— Theodore Marsh, Doorman, on duty until 02:00</em>',
+    hard:'Samkeet\'s front-door exit at 01:40 is confirmed. Aparna\'s claimed exit at 01:45 is NOT confirmed — the doorman has no memory of seeing her leave. Her alibi is unverified.',
+    tag:'Clears: Samkeet / Aparna\'s exit unconfirmed',
+    fact:{label:'Evidence C — Doorman',text:'Samkeet confirmed out front ~01:40. Doorman cannot confirm Aparna\'s exit. Her claimed 01:45 departure is unverified.'}
   },
   D:{
     label:'Exhibit D', title:"Coroner's Note", icon:'🔬', num:'D',
@@ -810,8 +809,8 @@ var evidence = {
   },
   E:{
     label:'Exhibit E', title:'Alley & Witness', icon:'🏚️', num:'E',
-    body:'<strong>Alley layout:</strong> The alley behind The Blue Vesper has exactly two exits — the service door into the bar, and the street mouth onto Crane Alley. No ladders, no side passages, no other egress.<br><br><strong>Witness — Mrs. Petra Vanek (apartment overlooking Crane Alley):</strong><br>"I couldn\'t sleep. I was at my window from about 01:35 until well after 02:00. I heard the rain start. Maybe five or ten minutes later I heard a man and a woman — voices raised, the woman especially. Then a thud. Then nothing. <strong>I never saw anyone come out of that alley onto the street. Not once.</strong> If someone had walked past my window I\'d have seen them."',
-    hard:'No one left by the street exit. The killer returned via the service door. A woman\'s voice was heard arguing with Marcus. Raymond corroborates. The killer is a woman who re-entered through the bar.',
+    body:'<strong>Alley layout:</strong> The alley behind The Blue Vesper has exactly two exits — the service door into the bar, and the street mouth onto Crane Alley. No ladders, no side passages, no other egress.<br><br><strong>Witness — Mrs. Petra Vanek (apartment overlooking Crane Alley):</strong><br>"I couldn\'t sleep. I was at my window from about 01:35 until well after 02:00. I heard the rain start. Maybe five or ten minutes after that I heard a man and a woman — voices raised, the woman especially. Then a thud. Then nothing. <strong>I never saw anyone come out of that alley onto the street. Not once.</strong> If someone had walked past my window I\'d have seen them."<br><br>Cross-referenced with Aditya\'s statement: he heard the same woman, went back inside, and did not see the street exit used.',
+    hard:'No one left by the street exit. The killer returned via the service door. A woman\'s voice was heard arguing with Marcus. Aditya corroborates. The killer is a woman who re-entered through the bar.',
     tag:'Establishes: killer is a woman / killer used service door',
     fact:{label:'Evidence E — Alley Witness',text:'Killer never left by street mouth — re-entered through service door. A woman argued with Marcus. Killer is a woman.'}
   },
@@ -827,23 +826,23 @@ var evidence = {
 var verdicts = {
   correct:{
     chain:[
-      '[B] Cy Harlan on camera 01:15–02:02, unbroken. <strong>Eliminated.</strong>',
-      '[C] Irene Solano exits front door 01:45 — doorman witnessed. <strong>Eliminated.</strong>',
-      '[C] June Arroyo exits front door 01:40, umbrella in hand — doorman witnessed. <strong>Eliminated.</strong> (The umbrella is a deliberate misdirection.)',
-      '[E] Mrs. Vanek watched the Crane Alley street mouth 01:35–02:00. No one came out. Raymond heard a woman with Marcus and went back inside — he is a witness, not the killer.',
-      '[A] No cab or rideshare came for Delphine. Her alibi is fabricated. <strong>She never left.</strong>',
-      '[E] The killer is a woman — Vanek heard her voice. Delphine is the only woman unaccounted for.',
-      '[D+F] Struck from behind with a brass-handled umbrella — the blow of someone Marcus trusted enough to turn away from. An ex-lover.',
-      'Delphine followed Marcus into the alley. She confronted him about the sale. He turned his back. She swung. She walked back through the service door.',
-      '<strong>Motive:</strong> Marcus was selling The Blue Vesper. Delphine\'s residency — her stage, her income, her identity — died with that sale.'
+      '[B] Yohaan on camera 01:15–02:02, unbroken. <strong>Eliminated.</strong>',
+      '[A] Cab log confirms Prachi\'s pickup at 01:31 — she was in transit until 01:49. <strong>Eliminated.</strong>',
+      '[C] Samkeet exits front door 01:40, umbrella in hand — doorman witnessed. <strong>Eliminated.</strong> (The umbrella is a deliberate misdirection.)',
+      '[E] Mrs. Vanek watched the Crane Alley street mouth 01:35–02:00. No one came out. Aditya heard a woman with Marcus and went back inside — he is a witness, not the killer.',
+      '[E] The killer is a woman — Vanek heard her voice. The only woman unaccounted for is Aparna.',
+      '[C] Doorman cannot confirm Aparna\'s exit. She claims 01:45 front door — Theodore has no memory of it. <strong>Her alibi does not exist.</strong>',
+      '[D+F] Struck from behind with a brass-handled umbrella — someone Marcus was comfortable turning his back on. A creditor he\'d met with that same night.',
+      'Aparna followed Marcus into the alley. The meeting had failed. The sale would erase her loan. He turned away. She swung. She re-entered through the service door.',
+      '<strong>Motive:</strong> The pending sale was to a buyer who would restructure all debts. Aparna\'s loan — three years of exposure — would have been written down to nothing. Killing Marcus stopped the sale.'
     ],
-    close:'The cab was the tell. Specific lies always are.'
+    close:'The doorman\'s silence was the tell. It\'s not what witnesses say — it\'s what they can\'t confirm.'
   },
   wrong:{
-    raymond:'Raymond was in the alley — which makes him the most tempting wrong answer. But Evidence E settles it: Mrs. Vanek heard a <em>woman\'s</em> voice. Raymond\'s own statement says the same. He went back inside. He is a reluctant witness, not the killer. Return to the Hub and check the witness account carefully.',
-    cy:'The camera doesn\'t lie. Evidence B places Cy continuously on camera 01:15–02:02. He was never in the alley. Return to Evidence B.',
-    irene:'A dead debtor can\'t repay a loan — Irene\'s own logic exonerates her. Beyond motive, the doorman places her at the front exit at 01:45. She was not in the alley. Review Evidence C.',
-    june:'The umbrella in June\'s hand is deliberate misdirection. The doorman places her at the front entrance at 01:40 — not the alley. She cannot be in two places at once. Review Evidence C and E together.'
+    prachi:'Check Evidence A again — the cab log confirms Prachi\'s pickup at 01:31. She was in transit until 01:49, well outside the kill window. Her alibi is solid. Return to the cab log.',
+    aditya:'Aditya was in the alley — which makes him the most tempting wrong answer. But Evidence E settles it: Mrs. Vanek heard a <em>woman\'s</em> voice. Aditya\'s own statement says the same. He went back inside. He is a reluctant witness, not the killer.',
+    yohaan:'The camera doesn\'t lie. Evidence B places Yohaan continuously on camera 01:15–02:02. He was never in the alley. Return to Evidence B.',
+    samkeet:'The umbrella is deliberate misdirection. The doorman specifically places Samkeet at the front entrance at 01:40 — not the alley. He cannot be in two places at once. Review Evidence C and E together.'
   }
 };
 
@@ -1020,7 +1019,7 @@ function renderVerdict(choice){
   if(choice===KILLER){
     var v=verdicts.correct;
     el.innerHTML='<div class="verdict-stamp stamp-correct">CASE CLOSED</div>'
-      +'<div class="verdict-sub">— Delphine Voss — The Singer — The Ex-Lover —</div>'
+      +'<div class="verdict-sub">— Aparna — The Investor — The Creditor —</div>'
       +'<div class="verdict-prose">'
       +'<div class="dossier"><div class="dossier-stamp" style="border-color:var(--green);color:var(--green)">Closed</div>'
       +'<h3>The Elimination Chain</h3>'
