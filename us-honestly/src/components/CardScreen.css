@@ -45,6 +45,12 @@
   cursor: pointer;
   outline: none;
   padding: 1rem 0;
+  filter: drop-shadow(0 20px 60px var(--cat-glow));
+  transition: filter 0.18s ease;
+}
+
+.card-scene:hover {
+  filter: drop-shadow(0 24px 72px var(--cat-glow));
 }
 
 .card-inner {
@@ -53,11 +59,6 @@
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 20px 60px var(--cat-glow));
-}
-
-.card-inner:hover {
-  filter: drop-shadow(0 24px 72px var(--cat-glow));
 }
 
 .card-face {
