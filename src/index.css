@@ -4,30 +4,87 @@
 
 @layer base {
   body {
-    @apply font-sans text-ink antialiased;
+    @apply font-sans text-ink antialiased bg-white;
+    line-height: 1.65;
   }
   h1, h2, h3, h4 {
     @apply font-serif;
+    line-height: 1.1;
+  }
+  ::selection {
+    background-color: #C79A3E22;
   }
 }
 
 @layer components {
+  /* ── Containers ── */
+  .container-brand {
+    @apply max-w-brand mx-auto px-6 md:px-12 lg:px-20;
+  }
+
+  /* ── Buttons ── */
   .btn-primary {
-    @apply bg-gold text-white px-6 py-2.5 font-sans font-medium text-sm tracking-wide hover:bg-gold-dark transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center bg-ink text-white px-8 py-3.5
+           font-sans text-[11px] font-medium uppercase tracking-label
+           hover:bg-ink/80 transition-colors duration-200
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-gold {
+    @apply inline-flex items-center justify-center bg-gold text-white px-8 py-3.5
+           font-sans text-[11px] font-medium uppercase tracking-label
+           hover:bg-gold-dark transition-colors duration-200;
   }
   .btn-outline {
-    @apply border border-gold text-gold px-6 py-2.5 font-sans font-medium text-sm tracking-wide hover:bg-gold hover:text-white transition-colors duration-200;
+    @apply inline-flex items-center justify-center border border-gold text-gold px-8 py-3.5
+           font-sans text-[11px] font-medium uppercase tracking-label
+           hover:bg-gold hover:text-white transition-colors duration-200;
+  }
+  .btn-outline-ink {
+    @apply inline-flex items-center justify-center border border-ink text-ink px-8 py-3.5
+           font-sans text-[11px] font-medium uppercase tracking-label
+           hover:bg-ink hover:text-white transition-colors duration-200;
   }
   .btn-ghost {
-    @apply text-ink px-4 py-2 font-sans font-medium text-sm hover:text-gold transition-colors duration-200;
+    @apply font-sans text-[11px] font-medium uppercase tracking-label
+           text-muted hover:text-ink transition-colors duration-200;
   }
+
+  /* ── Forms ── */
   .input-field {
-    @apply w-full border border-gray-200 px-4 py-2.5 text-sm font-sans text-ink placeholder-gray-400 focus:outline-none focus:border-gold transition-colors duration-200;
+    @apply w-full border border-warm-border bg-white px-5 py-4
+           font-sans text-sm text-ink placeholder-muted/50
+           focus:outline-none focus:border-gold transition-colors duration-200;
+    min-height: 52px;
+  }
+  .input-label {
+    @apply font-sans text-[10px] uppercase tracking-label text-muted font-medium block mb-2;
+  }
+  textarea.input-field {
+    min-height: auto;
+  }
+
+  /* ── Typography utilities ── */
+  .section-label {
+    @apply font-sans text-[10px] uppercase tracking-wide3 text-gold font-medium;
   }
   .section-title {
-    @apply font-serif text-3xl md:text-4xl text-ink font-medium;
+    @apply font-serif text-4xl md:text-5xl text-ink font-medium leading-editorial;
   }
-  .gold-divider {
-    @apply w-12 h-0.5 bg-gold my-4;
+  .gold-rule {
+    @apply block w-8 h-px bg-gold;
+  }
+
+  /* ── Admin ── */
+  .admin-label {
+    @apply font-sans text-[10px] uppercase tracking-label text-muted font-medium;
+  }
+  .admin-th {
+    @apply px-4 py-3 text-left admin-label border-b border-warm-border;
+  }
+  .admin-td {
+    @apply px-4 py-3.5 font-sans text-sm text-ink border-b border-warm-border;
+  }
+  .admin-card {
+    @apply bg-white border border-warm-border;
   }
 }

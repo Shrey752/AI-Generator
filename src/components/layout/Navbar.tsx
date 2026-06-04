@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Menu, X, ShoppingBag, User, LogOut } from 'lucide-react'
+import { Menu, X, ShoppingBag } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useCartStore } from '../../store/cartStore'
+import WovenIcon from '../ui/WovenIcon'
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -16,119 +17,126 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { to: '/', label: 'Home' },
     { to: '/catalog', label: 'Catalog' },
     { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
   ]
 
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    `font-sans text-[11px] uppercase tracking-label transition-colors duration-200 ${
+      isActive ? 'text-gold' : 'text-muted hover:text-ink'
+    }`
+
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex flex-col leading-none">
-            <span className="font-serif text-xl font-semibold text-ink tracking-wide">NEMIDEEP</span>
-            <span className="font-sans text-xs text-gold tracking-[0.2em] uppercase">weaves</span>
+    <header className="sticky top-0 z-50 bg-white border-b border-warm-border">
+      <div className="container-brand">
+        <div className="flex items-center justify-between h-18">
+
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3 group" aria-label="NEMIDEEP weaves — home">
+            <WovenIcon size={22} />
+            <div className="leading-none">
+              <div className="font-serif text-[17px] font-medium text-ink tracking-wide group-hover:text-gold transition-colors duration-200">
+                NEMIDEEP
+              </div>
+              <div className="font-sans text-[8px] text-gold tracking-wide3 uppercase mt-0.5">
+                weaves
+              </div>
+            </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-10">
             {navLinks.map((l) => (
-              <NavLink
-                key={l.to}
-                to={l.to}
-                end={l.to === '/'}
-                className={({ isActive }) =>
-                  `font-sans text-sm font-medium transition-colors duration-200 ${
-                    isActive ? 'text-gold' : 'text-ink hover:text-gold'
-                  }`
-                }
-              >
+              <NavLink key={l.to} to={l.to} className={linkClass}>
                 {l.label}
               </NavLink>
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
+          {/* Desktop auth / actions */}
+          <div className="hidden md:flex items-center gap-6">
             {!user ? (
               <>
-                <Link to="/login" className="btn-ghost text-sm">Login</Link>
-                <Link to="/signup" className="btn-primary text-sm">Sign Up</Link>
+                <Link to="/login" className="btn-ghost">Login</Link>
+                <Link to="/signup" className="btn-outline-ink py-2.5 px-6">Register</Link>
               </>
             ) : isAdmin ? (
               <>
-                <Link to="/admin" className="btn-ghost text-sm flex items-center gap-1.5">
-                  <User size={15} /> Admin
-                </Link>
-                <button onClick={handleSignOut} className="btn-ghost text-sm flex items-center gap-1.5">
-                  <LogOut size={15} /> Sign Out
-                </button>
+                <Link to="/admin" className="btn-ghost">Dashboard</Link>
+                <button onClick={handleSignOut} className="btn-ghost">Sign Out</button>
               </>
             ) : (
               <>
-                <Link to="/enquiry" className="relative btn-ghost text-sm flex items-center gap-1.5">
-                  <ShoppingBag size={15} />
+                <Link to="/enquiry" className="relative flex items-center gap-2 btn-ghost">
+                  <ShoppingBag size={14} strokeWidth={1.5} />
                   Enquiry
                   {items.length > 0 && (
-                    <span className="absolute -top-1 -right-2 bg-gold text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                    <span className="absolute -top-1.5 -right-2 w-4 h-4 bg-gold text-white text-[9px] flex items-center justify-center rounded-full font-medium">
                       {items.length}
                     </span>
                   )}
                 </Link>
-                <Link to="/dashboard" className="btn-ghost text-sm flex items-center gap-1.5">
-                  <User size={15} /> Dashboard
-                </Link>
-                <button onClick={handleSignOut} className="btn-ghost text-sm flex items-center gap-1.5">
-                  <LogOut size={15} /> Sign Out
-                </button>
+                <Link to="/dashboard" className="btn-ghost">Account</Link>
+                <button onClick={handleSignOut} className="btn-ghost">Sign Out</button>
               </>
             )}
           </div>
 
+          {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2 text-ink"
+            className="md:hidden p-2 -mr-2 text-ink"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
+            aria-label="Toggle navigation"
           >
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
           </button>
         </div>
       </div>
 
+      {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-3">
-          {navLinks.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.to === '/'}
-              className={({ isActive }) =>
-                `block font-sans text-sm font-medium py-1.5 ${isActive ? 'text-gold' : 'text-ink'}`
-              }
-              onClick={() => setMobileOpen(false)}
-            >
-              {l.label}
-            </NavLink>
-          ))}
-          <div className="pt-2 border-t border-gray-100 space-y-2">
-            {!user ? (
-              <>
-                <Link to="/login" className="block btn-ghost text-sm" onClick={() => setMobileOpen(false)}>Login</Link>
-                <Link to="/signup" className="block btn-primary text-sm text-center" onClick={() => setMobileOpen(false)}>Sign Up</Link>
-              </>
-            ) : isAdmin ? (
-              <>
-                <Link to="/admin" className="block btn-ghost text-sm" onClick={() => setMobileOpen(false)}>Admin Dashboard</Link>
-                <button onClick={() => { handleSignOut(); setMobileOpen(false) }} className="btn-ghost text-sm">Sign Out</button>
-              </>
-            ) : (
-              <>
-                <Link to="/enquiry" className="block btn-ghost text-sm" onClick={() => setMobileOpen(false)}>
-                  Enquiry List {items.length > 0 && `(${items.length})`}
-                </Link>
-                <Link to="/dashboard" className="block btn-ghost text-sm" onClick={() => setMobileOpen(false)}>Dashboard</Link>
-                <button onClick={() => { handleSignOut(); setMobileOpen(false) }} className="btn-ghost text-sm">Sign Out</button>
-              </>
-            )}
+        <div className="md:hidden border-t border-warm-border bg-white">
+          <div className="container-brand py-6 space-y-1">
+            {navLinks.map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                className={({ isActive }) =>
+                  `block font-sans text-[11px] uppercase tracking-label py-2.5 border-b border-warm-border/50 ${
+                    isActive ? 'text-gold' : 'text-muted'
+                  }`
+                }
+                onClick={() => setMobileOpen(false)}
+              >
+                {l.label}
+              </NavLink>
+            ))}
+            <div className="pt-4 space-y-3">
+              {!user ? (
+                <>
+                  <Link to="/login" onClick={() => setMobileOpen(false)} className="block font-sans text-[11px] uppercase tracking-label text-muted py-2">
+                    Login
+                  </Link>
+                  <Link to="/signup" onClick={() => setMobileOpen(false)} className="btn-outline-ink w-full text-center">
+                    Register
+                  </Link>
+                </>
+              ) : isAdmin ? (
+                <>
+                  <Link to="/admin" onClick={() => setMobileOpen(false)} className="block btn-ghost py-2">Admin Dashboard</Link>
+                  <button onClick={() => { handleSignOut(); setMobileOpen(false) }} className="block btn-ghost py-2">Sign Out</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/enquiry" onClick={() => setMobileOpen(false)} className="block btn-ghost py-2">
+                    Enquiry List {items.length > 0 && `(${items.length})`}
+                  </Link>
+                  <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="block btn-ghost py-2">Account</Link>
+                  <button onClick={() => { handleSignOut(); setMobileOpen(false) }} className="block btn-ghost py-2">Sign Out</button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

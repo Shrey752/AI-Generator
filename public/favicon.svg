@@ -1,0 +1,15 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" fill="#1A1A1A"/>
+  <!-- 4 vertical warp threads (white) -->
+  <line x1="8"  y1="5" x2="8"  y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <line x1="14" y1="5" x2="14" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <line x1="20" y1="5" x2="20" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <line x1="26" y1="5" x2="26" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <!-- 3 weft threads (gold) — plain weave over/under -->
+  <line x1="4"  y1="12" x2="11" y2="12" stroke="#C79A3E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="17" y1="12" x2="23" y2="12" stroke="#C79A3E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="11" y1="18" x2="17" y2="18" stroke="#C79A3E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="23" y1="18" x2="29" y2="18" stroke="#C79A3E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="4"  y1="24" x2="11" y2="24" stroke="#C79A3E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="17" y1="24" x2="23" y2="24" stroke="#C79A3E" stroke-width="2" stroke-linecap="round"/>
+</svg>
