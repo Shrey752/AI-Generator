@@ -1,0 +1,38 @@
+<svg width="280" height="56" viewBox="0 0 280 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Woven icon: 4 warp (ink) + 3 weft rows (gold), plain weave -->
+  <!-- Warp threads -->
+  <line x1="8"  y1="6"  x2="8"  y2="50" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="16" y1="6"  x2="16" y2="50" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="24" y1="6"  x2="24" y2="50" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="32" y1="6"  x2="32" y2="50" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Weft row 1 — over warp 1 & 3, under 2 & 4 -->
+  <line x1="4"  y1="18" x2="12" y2="18" stroke="#C79A3E" stroke-width="3" stroke-linecap="round"/>
+  <line x1="20" y1="18" x2="28" y2="18" stroke="#C79A3E" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Weft row 2 — over warp 2 & 4, under 1 & 3 -->
+  <line x1="12" y1="28" x2="20" y2="28" stroke="#C79A3E" stroke-width="3" stroke-linecap="round"/>
+  <line x1="28" y1="28" x2="36" y2="28" stroke="#C79A3E" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Weft row 3 — same as row 1 -->
+  <line x1="4"  y1="38" x2="12" y2="38" stroke="#C79A3E" stroke-width="3" stroke-linecap="round"/>
+  <line x1="20" y1="38" x2="28" y2="38" stroke="#C79A3E" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Wordmark: NEMIDEEP -->
+  <text x="52" y="34"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="22"
+    font-weight="500"
+    letter-spacing="3"
+    fill="#1A1A1A">NEMIDEEP</text>
+
+  <!-- Sub-label: weaves -->
+  <text x="54" y="48"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="9"
+    font-weight="400"
+    letter-spacing="6"
+    fill="#C79A3E">WEAVES</text>
+
+</svg>
